@@ -1,40 +1,53 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from datetime import datetime
 import os
 import time
-from datetime import datetime
-from selenium import webdriver
+from threading import Thread
 
-# ✅ Set Chrome profile path (Change this to your actual profile path)
-chrome_profile_path = os.path.expanduser("~/Library/Application Support/Google/Chrome/Profile 1")
+# Selenium Grid URL (use service name from docker-compose)
+GRID_URL = "http://selenium-hub:4444/wd/hub"
 
-# ✅ Ensure screenshot folder exists
-screenshot_folder = os.path.expanduser("~/Desktop/WhatsApp_Screenshots")
+# Folder for screenshots inside container
+screenshot_folder = "/app/Utilities/screenshots"
 os.makedirs(screenshot_folder, exist_ok=True)
 
-# ✅ Set Chrome options to use the existing profile
-options = webdriver.ChromeOptions()
-options.add_argument(f"--user-data-dir={chrome_profile_path}")  # Use existing Chrome profile
-options.add_argument("--profile-directory=Default")  # Adjust if needed
+# Wait for hub to be ready
+time.sleep(5)
 
-# ✅ Start WebDriver
-driver = webdriver.Chrome(options=options)
+def take_screenshot(browser_name):
+    if browser_name == "chrome":
+        options = ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+    else:
+        options = FirefoxOptions()
+        options.add_argument("--headless")
 
-# Open WhatsApp Web (it should already be logged in)
-driver.get("https://web.whatsapp.com")
-time.sleep(10)  # Wait for page to load
+    driver = webdriver.Remote(
+        command_executor=GRID_URL,
+        options=options
+    )
 
-print(f"✅ WhatsApp Web opened. Saving screenshots to: {screenshot_folder}")
+    driver.get("https://web.whatsapp.com")
+    time.sleep(15)  # wait for login QR scan
 
-# ✅ Take screenshots every 1 minute
-while True:
-    try:
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        screenshot_path = os.path.join(screenshot_folder, f"whatsapp_{timestamp}.png")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    path = os.path.join(screenshot_folder, f"whatsapp_{browser_name}_{timestamp}.png")
+    driver.save_screenshot(path)
+    print(f"{browser_name} screenshot saved: {path}")
 
-        driver.save_screenshot(screenshot_path)
-        print(f"📸 Screenshot saved: {screenshot_path}")
+    driver.quit()
 
-        time.sleep(16)  # Wait for 1 minute
+# Create threads for Chrome and Firefox
+threads = []
+for browser in ["chrome", "firefox"]:
+    t = Thread(target=take_screenshot, args=(browser,))
+    t.start()
+    threads.append(t)
 
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        break
+# Wait for both threads to finish
+for t in threads:
+    t.join()
