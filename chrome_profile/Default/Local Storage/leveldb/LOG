@@ -1,0 +1,6 @@
+2025/03/13-14:55:41.266 3403 Reusing MANIFEST /Users/cdp/Desktop/pythonProject1/chrome_profile/Default/Local Storage/leveldb/MANIFEST-000001
+2025/03/13-14:55:41.272 3403 Recovering log #3
+2025/03/13-14:55:41.272 3403 Reusing old log /Users/cdp/Desktop/pythonProject1/chrome_profile/Default/Local Storage/leveldb/000003.log 
+2025/03/13-15:01:45.777 3503 Level-0 table #5: started
+2025/03/13-15:01:45.781 3503 Level-0 table #5: 18045 bytes OK
+2025/03/13-15:01:45.788 3503 Delete type=0 #3
