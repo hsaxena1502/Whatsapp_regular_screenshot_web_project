@@ -1,3 +1,4 @@
+requests
 python-dotenv
 openai
 selenium==4.15.2
