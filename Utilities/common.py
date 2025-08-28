@@ -41,6 +41,7 @@ def take_screenshot(browser_name):
 
     driver.quit()
 
+
 # Create threads for Chrome and Firefox
 threads = []
 for browser in ["chrome", "firefox"]:

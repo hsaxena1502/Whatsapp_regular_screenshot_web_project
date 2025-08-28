@@ -48,4 +48,3 @@ COPY . .
 
 # Run main script using Xvfb for virtual display
 CMD ["python", "Utilities/common.py"]
-

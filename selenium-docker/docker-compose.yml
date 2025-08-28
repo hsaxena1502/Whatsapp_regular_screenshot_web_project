@@ -1,24 +1,40 @@
 services:
   selenium-hub:
-    image: selenium/hub:4.13.0
+    image: seleniarm/hub:4.3.0-20220728
     container_name: selenium-hub
     ports:
-      - "4444:4444"
+      - "4444:4444"   # Grid + UI
+    # 4442/4443 are internal to the docker network; no need to expose
+    # but you can keep them if you want:
+    # - "4442:4442"
+    # - "4443:4443"
 
   chrome:
-    image: selenium/node-chrome:4.13.0
-    depends_on:
-      - selenium-hub
+    image: seleniarm/node-chromium:4.3.0-20220728
+    depends_on: [selenium-hub]
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+    shm_size: 2gb
+    volumes: ["/dev/shm:/dev/shm"]
+    ports:
+      - "5901:5900"  # Only useful if NOT headless
 
   firefox:
-    image: selenium/node-firefox:4.13.0
-    depends_on:
-      - selenium-hub
+    image: seleniarm/node-firefox:4.3.0-20220728
+    depends_on: [selenium-hub]
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+    shm_size: 2gb
+    volumes: ["/dev/shm:/dev/shm"]
+    ports:
+      - "5902:5900"  # VNC port for Firefox
